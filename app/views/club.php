@@ -95,6 +95,14 @@
                 </select>
             </label>
             <label>
+                Match Type
+                <select name="match_type">
+                    <option value="friendly">Friendly (友谊赛)</option>
+                    <option value="official">Official (官方赛)</option>
+                    <option value="casual">Casual (随意赛)</option>
+                </select>
+            </label>
+            <label>
                 Played at (optional ISO time)
                 <input type="text" name="played_at" placeholder="2026-02-10T18:00:00Z">
             </label>
@@ -108,18 +116,32 @@
     <?php if (empty($matches)) : ?>
         <p>No matches yet.</p>
     <?php else : ?>
-        <?php // 最近比赛展示。 ?>
+        <?php // 最近比赛展示，包含比赛类型。 ?>
         <div class="table-wrap">
             <table>
                 <thead>
                 <tr>
                     <th>Players</th>
                     <th>Result</th>
+                    <th>Type</th>
                     <th>Played at</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($matches as $match) : ?>
+                    <?php
+                    // 确定比赛类型的显示标签和颜色。
+                    $typeLabel = match($match['match_type'] ?? 'friendly') {
+                        'official' => 'Official',
+                        'casual' => 'Casual',
+                        default => 'Friendly'
+                    };
+                    $typeColor = match($match['match_type'] ?? 'friendly') {
+                        'official' => 'var(--blue)',
+                        'casual' => 'var(--amber)',
+                        default => 'var(--green)'
+                    };
+                    ?>
                     <tr>
                         <td>
                             <?php echo htmlspecialchars($match['player_a_name']); ?>
@@ -132,6 +154,15 @@
                             <?php else : ?>
                                 Winner: <?php echo htmlspecialchars($match['winner_name'] ?? ''); ?>
                             <?php endif; ?>
+                        </td>
+                        <td>
+                            <span style="
+                                color: <?php echo $typeColor; ?>;
+                                font-weight: 600;
+                                font-size: 0.9rem;
+                            ">
+                                <?php echo $typeLabel; ?>
+                            </span>
                         </td>
                         <td><?php echo htmlspecialchars($match['played_at']); ?></td>
                     </tr>

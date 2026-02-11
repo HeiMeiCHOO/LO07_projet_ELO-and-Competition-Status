@@ -76,6 +76,7 @@ function ensure_schema(PDO $db): void
     // - player_b_id: 选手 B 用户 ID。
     // - winner_id: 胜者用户 ID（平局为 NULL）。
     // - is_draw: 是否平局（1/0）。
+    // - match_type: 比赛类型（official=官方赛, friendly=友谊赛, casual=随意赛）。
     // - played_at: 比赛时间（ISO 8601）。
     $db->exec(
         'CREATE TABLE IF NOT EXISTS matches (
@@ -85,6 +86,7 @@ function ensure_schema(PDO $db): void
             player_b_id INTEGER NOT NULL,
             winner_id INTEGER,
             is_draw INTEGER NOT NULL DEFAULT 0,
+            match_type TEXT NOT NULL DEFAULT "friendly",
             played_at TEXT NOT NULL,
             FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE,
             FOREIGN KEY (player_a_id) REFERENCES users(id),

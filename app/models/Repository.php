@@ -186,13 +186,14 @@ class Repository
         int $playerBId,
         ?int $winnerId,
         bool $isDraw,
-        string $playedAt
+        string $playedAt,
+        string $matchType = 'friendly'
     ): int {
-        // 记录双方、胜者与比赛时间。
+        // 记录双方、胜者、比赛类型与比赛时间。
         $stmt = $this->db->prepare(
             'INSERT INTO matches
-                (club_id, player_a_id, player_b_id, winner_id, is_draw, played_at)
-             VALUES (:club_id, :player_a_id, :player_b_id, :winner_id, :is_draw, :played_at)'
+                (club_id, player_a_id, player_b_id, winner_id, is_draw, match_type, played_at)
+             VALUES (:club_id, :player_a_id, :player_b_id, :winner_id, :is_draw, :match_type, :played_at)'
         );
         $stmt->execute([
             'club_id' => $clubId,
@@ -200,6 +201,7 @@ class Repository
             'player_b_id' => $playerBId,
             'winner_id' => $winnerId,
             'is_draw' => $isDraw ? 1 : 0,
+            'match_type' => $matchType,
             'played_at' => $playedAt,
         ]);
 
@@ -286,11 +288,13 @@ class Repository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 列出比赛历史，可按选手名筛选。
-    public function listMatches(int $clubId, string $playerFilter = ''): array
+    // 列出比赛历史，可按选手名和比赛类型筛选。
+    public function listMatches(int $clubId, string $playerFilter = '', string $typeFilter = ''): array
     {
         // 动态拼接筛选条件。
-        $filter = trim($playerFilter);
+        $playerFilter = trim($playerFilter);
+        $typeFilter = trim($typeFilter);
+        
         $sql =
             'SELECT m.*, ua.username AS player_a_name, ub.username AS player_b_name,
                 uw.username AS winner_name
@@ -301,9 +305,15 @@ class Repository
              WHERE m.club_id = :club_id';
 
         $params = ['club_id' => $clubId];
-        if ($filter !== '') {
+        
+        if ($playerFilter !== '') {
             $sql .= ' AND (ua.username LIKE :filter OR ub.username LIKE :filter)';
-            $params['filter'] = '%' . $filter . '%';
+            $params['filter'] = '%' . $playerFilter . '%';
+        }
+        
+        if ($typeFilter !== '') {
+            $sql .= ' AND m.match_type = :type';
+            $params['type'] = $typeFilter;
         }
 
         $sql .= ' ORDER BY m.played_at DESC';

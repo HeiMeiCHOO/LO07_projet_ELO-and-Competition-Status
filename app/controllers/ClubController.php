@@ -62,6 +62,7 @@ class ClubController
         $playerB = (int) ($input['player_b'] ?? 0);
         $result = $input['result'] ?? 'A';
         $playedAt = trim($input['played_at'] ?? '');
+        $matchType = trim($input['match_type'] ?? 'friendly');
 
         // 基本校验：选择不同选手。
         if ($playerA === 0 || $playerB === 0 || $playerA === $playerB) {
@@ -77,6 +78,12 @@ class ClubController
                 'success' => false,
                 'message' => 'Invalid match result.',
             ];
+        }
+
+        // 校验比赛类型是否合法。
+        $validTypes = ['official', 'friendly', 'casual'];
+        if (! in_array($matchType, $validTypes, true)) {
+            $matchType = 'friendly';
         }
 
         // 若未提供时间则使用当前 UTC 时间。
@@ -122,7 +129,8 @@ class ClubController
                 $playerB,
                 $winnerId,
                 $isDraw,
-                $playedAtValue
+                $playedAtValue,
+                $matchType
             );
 
             // 记录双方 Elo 变化历史。

@@ -27,23 +27,23 @@ function clear_data(PDO $db): void
 // 生成演示数据
 function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $defaultElo): void
 {
-    // 定义三个俱乐部的数据
+    // 定义三个俱乐部的数据（包含比赛类型）
     $clubsData = [
         [
             'name' => '象棋俱乐部',
             'sport' => 'Chess',
             'members' => ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve'],
             'matches' => [
-                ['Alice', 'Eve', 'A'],
-                ['Bob', 'Diana', 'A'],
-                ['Alice', 'Bob', 'A'],
-                ['Charlie', 'Eve', 'A'],
-                ['Bob', 'Charlie', 'A'],
-                ['Diana', 'Eve', 'D'],
-                ['Alice', 'Charlie', 'B'],
-                ['Bob', 'Diana', 'B'],
-                ['Eve', 'Alice', 'D'],
-                ['Charlie', 'Bob', 'B'],
+                ['Alice', 'Eve', 'A', 'friendly'],
+                ['Bob', 'Diana', 'A', 'official'],
+                ['Alice', 'Bob', 'A', 'official'],
+                ['Charlie', 'Eve', 'A', 'friendly'],
+                ['Bob', 'Charlie', 'A', 'friendly'],
+                ['Diana', 'Eve', 'D', 'casual'],
+                ['Alice', 'Charlie', 'B', 'official'],
+                ['Bob', 'Diana', 'B', 'friendly'],
+                ['Eve', 'Alice', 'D', 'casual'],
+                ['Charlie', 'Bob', 'B', 'friendly'],
             ],
         ],
         [
@@ -51,18 +51,18 @@ function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $
             'sport' => 'Football',
             'members' => ['Tom', 'Jerry', 'Mike', 'John', 'Peter', 'David'],
             'matches' => [
-                ['Tom', 'Peter', 'A'],
-                ['Jerry', 'John', 'A'],
-                ['Mike', 'David', 'A'],
-                ['Tom', 'Jerry', 'D'],
-                ['John', 'David', 'A'],
-                ['Mike', 'Peter', 'B'],
-                ['Jerry', 'David', 'A'],
-                ['Tom', 'John', 'A'],
-                ['Peter', 'Mike', 'B'],
-                ['David', 'Jerry', 'A'],
-                ['Tom', 'Mike', 'A'],
-                ['Peter', 'John', 'D'],
+                ['Tom', 'Peter', 'A', 'official'],
+                ['Jerry', 'John', 'A', 'friendly'],
+                ['Mike', 'David', 'A', 'friendly'],
+                ['Tom', 'Jerry', 'D', 'casual'],
+                ['John', 'David', 'A', 'official'],
+                ['Mike', 'Peter', 'B', 'friendly'],
+                ['Jerry', 'David', 'A', 'official'],
+                ['Tom', 'John', 'A', 'friendly'],
+                ['Peter', 'Mike', 'B', 'casual'],
+                ['David', 'Jerry', 'A', 'official'],
+                ['Tom', 'Mike', 'A', 'friendly'],
+                ['Peter', 'John', 'D', 'friendly'],
             ],
         ],
         [
@@ -70,20 +70,20 @@ function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $
             'sport' => 'Basketball',
             'members' => ['James', 'Kobe', 'LeBron', 'Durant', 'Curry', 'Harden'],
             'matches' => [
-                ['James', 'Curry', 'A'],
-                ['Kobe', 'Harden', 'A'],
-                ['LeBron', 'Durant', 'A'],
-                ['James', 'Kobe', 'B'],
-                ['Durant', 'Curry', 'A'],
-                ['Harden', 'LeBron', 'D'],
-                ['Kobe', 'Durant', 'A'],
-                ['Curry', 'Harden', 'A'],
-                ['LeBron', 'James', 'B'],
-                ['James', 'Durant', 'D'],
-                ['Kobe', 'Curry', 'B'],
-                ['Harden', 'LeBron', 'A'],
-                ['James', 'Harden', 'A'],
-                ['Kobe', 'LeBron', 'A'],
+                ['James', 'Curry', 'A', 'friendly'],
+                ['Kobe', 'Harden', 'A', 'official'],
+                ['LeBron', 'Durant', 'A', 'friendly'],
+                ['James', 'Kobe', 'B', 'casual'],
+                ['Durant', 'Curry', 'A', 'friendly'],
+                ['Harden', 'LeBron', 'D', 'official'],
+                ['Kobe', 'Durant', 'A', 'official'],
+                ['Curry', 'Harden', 'A', 'friendly'],
+                ['LeBron', 'James', 'B', 'casual'],
+                ['James', 'Durant', 'D', 'friendly'],
+                ['Kobe', 'Curry', 'B', 'official'],
+                ['Harden', 'LeBron', 'A', 'friendly'],
+                ['James', 'Harden', 'A', 'official'],
+                ['Kobe', 'LeBron', 'A', 'friendly'],
             ],
         ],
     ];
@@ -114,7 +114,7 @@ function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $
         // 执行比赛
         echo "\n📊 $clubName 比赛记录:\n";
         foreach ($matches as $index => $match) {
-            [$playerAName, $playerBName, $result] = $match;
+            [$playerAName, $playerBName, $result, $matchType] = $match;
             $playerAId = $memberIds[$playerAName];
             $playerBId = $memberIds[$playerBName];
 
@@ -150,7 +150,8 @@ function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $
                     $playerBId,
                     $winnerId,
                     $isDraw,
-                    $playedAt
+                    $playedAt,
+                    $matchType
                 );
 
                 // 插入 Elo 历史
@@ -186,12 +187,18 @@ function seed_demo_data(PDO $db, Repository $repo, EloService $eloService, int $
                 $resultStr = $result === 'A' ? "$playerAName 胜" : ($result === 'B' ? "$playerBName 胜" : '平局');
                 $deltaA = $ratings['deltaA'];
                 $deltaB = $ratings['deltaB'];
+                $typeLabel = match($matchType) {
+                    'official' => '[官方赛]',
+                    'casual' => '[随意赛]',
+                    default => '[友谊赛]'
+                };
                 printf(
-                    "  比赛 %2d: %s vs %s → %s | %s %+d → %d, %s %+d → %d\n",
+                    "  比赛 %2d: %s vs %s → %s %s | %s %+d → %d, %s %+d → %d\n",
                     $index + 1,
                     str_pad($playerAName, 8),
                     str_pad($playerBName, 8),
                     $resultStr,
+                    $typeLabel,
                     str_pad($playerAName, 8),
                     $deltaA,
                     (int) $ratings['newA'],

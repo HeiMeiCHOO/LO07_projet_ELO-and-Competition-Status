@@ -11,12 +11,14 @@ if ($clubId === 0) {
 }
 
 $filter = trim($_GET['player'] ?? '');
+$filterType = trim($_GET['type'] ?? '');
 
 // 按条件读取历史数据。
 $controller = new HistoryController($repo);
-$data = $controller->getHistoryData($clubId, $filter);
+$data = $controller->getHistoryData($clubId, $filter, $filterType);
 $club = $data['club'];
 $matches = $data['matches'];
+$filterType = $data['filterType'];
 
 if (! $club) {
     header('Location: index.php');
