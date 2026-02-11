@@ -60,17 +60,19 @@
     <?php if (empty($history)) : ?>
         <p>No history yet.</p>
     <?php else : ?>
-        <?php // 折线图容器。 ?>
-        <canvas id="eloChart" height="120"></canvas>
+        <?php // 折线图容器（宽度更大以容纳更多数据）。 ?>
+        <div style="position: relative; height: 350px;">
+            <canvas id="eloChart"></canvas>
+        </div>
     <?php endif; ?>
 </section>
 
 <?php if (! empty($history)) : ?>
-    <?php // 使用 Chart.js 渲染 Elo 变化曲线。 ?>
+    <?php // 使用 Chart.js 渲染 Elo 变化曲线，优化了时间轴显示。 ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         // x 轴为时间，y 轴为 Elo 分数。
-        const labels = <?php echo json_encode(array_map(
+        const rawLabels = <?php echo json_encode(array_map(
             static fn($row) => $row['created_at'],
             $history
         )); ?>;
@@ -78,6 +80,16 @@
             static fn($row) => (int) $row['elo_after'],
             $history
         )); ?>;
+
+        // 将时间格式转换为更紧凑的格式（Month DD, HH:mm）
+        const labels = rawLabels.map(dateStr => {
+            const date = new Date(dateStr);
+            const month = date.toLocaleString('en-US', { month: 'short' });
+            const day = String(date.getDate()).padStart(2, '0');
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+            return `${month} ${day}\n${hour}:${minute}`;
+        });
 
         // 初始化折线图。
         const ctx = document.getElementById('eloChart');
@@ -91,14 +103,43 @@
                     borderColor: '#1f4ea5',
                     backgroundColor: 'rgba(31, 78, 165, 0.1)',
                     tension: 0.3,
-                    fill: true
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#1f4ea5'
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    }
+                },
                 scales: {
+                    x: {
+                        display: true,
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0,
+                            maxTicksLimit: Math.max(5, Math.ceil(labels.length / 3)),
+                            font: { size: 11 },
+                            padding: 8
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
                     y: {
-                        beginAtZero: false
+                        beginAtZero: false,
+                        ticks: {
+                            font: { size: 11 }
+                        }
                     }
                 }
             }
