@@ -56,6 +56,7 @@ ob_start();
     <?php if (empty($tournaments)) : ?>
         <p>No tournaments yet. Create your first tournament above!</p>
     <?php else : ?>
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr style="background: linear-gradient(135deg, var(--purple), var(--blue));">
@@ -105,6 +106,7 @@ ob_start();
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </section>
 

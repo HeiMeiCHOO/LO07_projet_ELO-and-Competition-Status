@@ -35,6 +35,7 @@ ob_start();
 <!-- 参与者列表 -->
 <section class="card">
     <h2>Participants</h2>
+    <div class="table-wrapper">
     <table>
         <thead>
             <tr style="background: linear-gradient(135deg, var(--sky), var(--blue));">
@@ -66,6 +67,7 @@ ob_start();
 <?php if ($tournament['status'] !== 'draft') : ?>
 <section class="card">
     <h2>Current Standings</h2>
+    <div class="table-wrapper">
     <table>
         <thead>
             <tr style="background: linear-gradient(135deg, var(--green), var(--sky));">
@@ -92,6 +94,7 @@ ob_start();
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
 </section>
 <?php endif; ?>
 
@@ -111,6 +114,7 @@ ob_start();
         ?>
         <?php foreach ($matchesByRound as $round => $roundMatches) : ?>
             <h3 style="color: var(--blue); margin-top: 20px;">Round <?= $round ?></h3>
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr style="background: linear-gradient(135deg, var(--purple-light), var(--blue-light));">
@@ -156,9 +160,9 @@ ob_start();
                                             <option value="">Select...</option>
                                             <option value="A"><?= htmlspecialchars($match['player_a_name']) ?> wins</option>
                                             <option value="B"><?= htmlspecialchars($match['player_b_name']) ?> wins</option>
-                                            <option value="D">Draw</option>
+                            <option value="D">Draw</option>
                                         </select>
-                                        <button type="submit" style="font-size: 0.9em; padding: 4px 8px;">Record</button>
+                                        <button type="submit" style="font-size: 0.9em; padding: 4px 8px;" class="btn-small">Record</button>
                                     </form>
                                 <?php else : ?>
                                     <span style="color: var(--green);">✓ Complete</span>
@@ -168,6 +172,7 @@ ob_start();
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         <?php endforeach; ?>
     <?php endif; ?>
 </section>
