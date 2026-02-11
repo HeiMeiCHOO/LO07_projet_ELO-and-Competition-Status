@@ -87,7 +87,17 @@ class ClubController
         }
 
         // 若未提供时间则使用当前 UTC 时间。
-        $playedAtValue = $playedAt !== '' ? $playedAt : gmdate('c');
+        // 支持友好格式如 "2026-02-10 18:00" 或标准 ISO 格式
+        if ($playedAt !== '') {
+            try {
+                $dt = new DateTimeImmutable($playedAt);
+                $playedAtValue = $dt->format('c');
+            } catch (Exception $e) {
+                $playedAtValue = gmdate('c');
+            }
+        } else {
+            $playedAtValue = gmdate('c');
+        }
 
         // 读取当前评分，确保双方均为俱乐部成员。
         $memberA = $this->repo->getMember($clubId, $playerA);

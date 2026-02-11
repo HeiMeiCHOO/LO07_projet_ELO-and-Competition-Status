@@ -80,7 +80,13 @@
                                 <?php echo $typeLabel; ?>
                             </span>
                         </td>
-                        <td><?php echo htmlspecialchars($match['played_at']); ?></td>
+                        <td>
+                            <?php
+                            // 格式化时间显示：Feb 11, 13:11
+                            $dt = new DateTimeImmutable($match['played_at']);
+                            echo $dt->format('M d, H:i');
+                            ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
