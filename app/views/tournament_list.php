@@ -39,7 +39,7 @@ ob_start();
             <div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--light-gray); padding: 10px; border-radius: 4px;">
                 <?php foreach ($members as $member) : ?>
                     <label style="display: block; margin: 5px 0;">
-                        <input type="checkbox" name="participants[]" value="<?= $member['id'] ?>">
+                        <input type="checkbox" name="participants[]" value="<?= $member['user_id'] ?>">
                         <?= htmlspecialchars($member['username']) ?> (Elo: <?= $member['current_elo'] ?>)
                     </label>
                 <?php endforeach; ?>
