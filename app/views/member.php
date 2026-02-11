@@ -46,7 +46,7 @@
                             </span>
                             (<?php echo (int) $match['elo_before']; ?> → <?php echo (int) $match['elo_after']; ?>)
                         </td>
-                        <td><?php echo htmlspecialchars($match['played_at']); ?></td>
+                        <td><?php $dt = new DateTime($match['played_at']); echo $dt->format('M d, H:i'); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
