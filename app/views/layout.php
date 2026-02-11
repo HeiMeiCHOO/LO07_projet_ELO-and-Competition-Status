@@ -18,6 +18,7 @@
                 <?php if (! empty($navClubId)) : ?>
                     <a href="club.php?club_id=<?php echo (int) $navClubId; ?>">👥 Club</a>
                     <a href="match_history.php?club_id=<?php echo (int) $navClubId; ?>">📈 History</a>
+                    <a href="tournament.php?club_id=<?php echo (int) $navClubId; ?>">🏆 Tournaments</a>
                 <?php endif; ?>
             </nav>
         </div>

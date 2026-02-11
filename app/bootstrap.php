@@ -7,11 +7,13 @@ $config = require __DIR__ . '/config/config.php';
 require __DIR__ . '/config/db.php';
 require __DIR__ . '/models/Repository.php';
 require __DIR__ . '/services/EloService.php';
+require __DIR__ . '/services/TournamentService.php';
 // 加载控制器。
 require __DIR__ . '/controllers/DashboardController.php';
 require __DIR__ . '/controllers/ClubController.php';
 require __DIR__ . '/controllers/HistoryController.php';
 require __DIR__ . '/controllers/MemberController.php';
+require __DIR__ . '/controllers/TournamentController.php';
 
 // 创建数据库连接与核心服务。
 $db = db_connect($config);

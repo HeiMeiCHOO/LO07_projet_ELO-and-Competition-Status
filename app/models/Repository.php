@@ -10,6 +10,12 @@ class Repository
         $this->db = $db;
     }
 
+    // 获取数据库连接（用于复杂查询）。
+    public function getConnection(): PDO
+    {
+        return $this->db;
+    }
+
     // 事务控制。
     public function beginTransaction(): void
     {

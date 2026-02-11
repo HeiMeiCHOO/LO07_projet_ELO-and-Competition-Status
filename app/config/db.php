@@ -120,4 +120,62 @@ function ensure_schema(PDO $db): void
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )'
     );
+
+    // 锦标赛表：组织和管理比赛锦标赛。
+    // 字段说明：
+    // - id: 锦标赛主键，自增。
+    // - club_id: 俱乐部 ID。
+    // - name: 锦标赛名称。
+    // - format: 比赛格式（'round-robin'=循环赛, 'elimination'=淘汰制）。
+    // - status: 状态（'draft'=草稿, 'in-progress'=进行中, 'completed'=已完成）。
+    // - created_at: 创建时间（ISO 8601）。
+    $db->exec(
+        'CREATE TABLE IF NOT EXISTS tournaments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            club_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            format TEXT NOT NULL DEFAULT "round-robin",
+            status TEXT NOT NULL DEFAULT "draft",
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (club_id) REFERENCES clubs(id) ON DELETE CASCADE
+        )'
+    );
+
+    // 锦标赛参与者表：记录锦标赛参与者。
+    // 字段说明：
+    // - id: 参与者记录主键，自增。
+    // - tournament_id: 锦标赛 ID。
+    // - user_id: 参与者用户 ID。
+    // - seed: 种子排名（1 = 最强）。
+    // - status: 参与者状态（'active'=进行中, 'eliminated'=已淘汰, 'completed'=已完成）。
+    $db->exec(
+        'CREATE TABLE IF NOT EXISTS tournament_participants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tournament_id INTEGER NOT NULL,
+            user_id INTEGER NOT NULL,
+            seed INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT "active",
+            UNIQUE (tournament_id, user_id),
+            FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )'
+    );
+
+    // 锦标赛比赛表：关联锦标赛中的比赛。
+    // 字段说明：
+    // - id: 关联记录主键，自增。
+    // - tournament_id: 锦标赛 ID。
+    // - match_id: 主比赛表中的比赛 ID。
+    // - round: 轮次（1, 2, 3...）。
+    $db->exec(
+        'CREATE TABLE IF NOT EXISTS tournament_matches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tournament_id INTEGER NOT NULL,
+            match_id INTEGER NOT NULL,
+            round INTEGER NOT NULL,
+            UNIQUE (tournament_id, match_id),
+            FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+            FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE
+        )'
+    );
 }

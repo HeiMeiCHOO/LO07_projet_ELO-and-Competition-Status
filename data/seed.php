@@ -16,6 +16,9 @@ require __DIR__ . '/../app/bootstrap.php';
 // 清空现有数据（可选）
 function clear_data(PDO $db): void
 {
+    $db->exec('DELETE FROM tournament_matches');
+    $db->exec('DELETE FROM tournament_participants');
+    $db->exec('DELETE FROM tournaments');
     $db->exec('DELETE FROM elo_history');
     $db->exec('DELETE FROM matches');
     $db->exec('DELETE FROM club_members');
@@ -345,6 +348,47 @@ try {
     // 生成演示数据
     echo "\n📝 生成演示数据...\n";
     seed_demo_data($db, $repo, $eloService, $defaultElo);
+
+    // 生成示例锦标赛
+    echo "\n🏆 生成示例锦标赛...\n";
+    $tournamentService = new TournamentService($repo, $eloService);
+    
+    // 为象棋俱乐部创建循环赛锦标赛
+    $chessClub = $db->query("SELECT id FROM clubs WHERE name = '象棋俱乐部'")->fetch(PDO::FETCH_ASSOC);
+    if ($chessClub) {
+        $clubId = $chessClub['id'];
+        $chessMembers = $db->query("SELECT user_id FROM club_members WHERE club_id = {$clubId} LIMIT 4")->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (count($chessMembers) >= 4) {
+            $tournamentId = $tournamentService->createTournament(
+                $clubId,
+                'Spring Chess Championship 2026',
+                'round-robin',
+                $chessMembers
+            );
+            echo "  ✓ 创建循环赛锦标赛 (ID: {$tournamentId}) - 象棋俱乐部\n";
+            echo "    参与者: " . count($chessMembers) . " 人\n";
+        }
+    }
+    
+    // 为足球俱乐部创建淘汰制锦标赛
+    $footballClub = $db->query("SELECT id FROM clubs WHERE name = '足球俱乐部'")->fetch(PDO::FETCH_ASSOC);
+    if ($footballClub) {
+        $clubId = $footballClub['id'];
+        $footballMembers = $db->query("SELECT user_id FROM club_members WHERE club_id = {$clubId} LIMIT 4")->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (count($footballMembers) >= 4) {
+            $tournamentId = $tournamentService->createTournament(
+                $clubId,
+                'Football Knockout Cup',
+                'elimination',
+                $footballMembers
+            );
+            $tournamentService->startTournament($tournamentId);
+            echo "  ✓ 创建淘汰制锦标赛 (ID: {$tournamentId}) - 足球俱乐部（已开始）\n";
+            echo "    参与者: " . count($footballMembers) . " 人\n";
+        }
+    }
 
     echo "\n✅ 数据生成完成！\n";
     echo "   访问 http://localhost:8001 开始测试\n\n";
