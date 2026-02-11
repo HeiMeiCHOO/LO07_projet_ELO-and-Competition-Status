@@ -330,4 +330,38 @@ class Repository
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // 获取成员在俱乐部的所有比赛（作为 player_a 或 player_b）。
+    public function listMemberMatches(int $clubId, int $userId): array
+    {
+        // 获取所有涉及该成员的比赛，包括对手名称与 Elo 变化。
+        $stmt = $this->db->prepare(
+            'SELECT 
+                m.id,
+                m.played_at,
+                CASE 
+                    WHEN m.player_a_id = :user_id THEN ub.username
+                    ELSE ua.username
+                END AS opponent_name,
+                m.player_a_id,
+                m.player_b_id,
+                m.winner_id,
+                m.is_draw,
+                eh1.elo_before,
+                eh1.elo_after,
+                eh1.delta
+             FROM matches m
+             JOIN users ua ON ua.id = m.player_a_id
+             JOIN users ub ON ub.id = m.player_b_id
+             JOIN elo_history eh1 ON eh1.match_id = m.id AND eh1.user_id = :user_id
+             WHERE m.club_id = :club_id AND (m.player_a_id = :user_id OR m.player_b_id = :user_id)
+             ORDER BY m.played_at DESC'
+        );
+        $stmt->execute([
+            'club_id' => $clubId,
+            'user_id' => $userId,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

@@ -14,11 +14,12 @@ class MemberController
     public function getMemberData(int $clubId, int $userId): array
     {
         return [
-            // 俱乐部信息、成员信息与 Elo 变化历史。
+            // 俱乐部信息、成员信息、Elo 变化历史与最近比赛。
             'club' => $this->repo->getClub($clubId),
             'user' => $this->repo->getUserById($userId),
             'membership' => $this->repo->getMember($clubId, $userId),
             'history' => $this->repo->listEloHistory($clubId, $userId),
+            'recent_matches' => $this->repo->listMemberMatches($clubId, $userId),
         ];
     }
 }

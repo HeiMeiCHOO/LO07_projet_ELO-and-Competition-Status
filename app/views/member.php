@@ -11,6 +11,51 @@
 </section>
 
 <section class="card">
+    <h2>Recent Matches</h2>
+    <?php if (empty($recent_matches)) : ?>
+        <p>No matches yet.</p>
+    <?php else : ?>
+        <?php // 最近比赛列表（按时间倒序）。 ?>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>vs</th>
+                    <th>Result</th>
+                    <th>Elo Change</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($recent_matches as $match) : ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($match['opponent_name']); ?></td>
+                        <td>
+                            <?php if ((int) $match['is_draw'] === 1) : ?>
+                                Draw
+                            <?php elseif ((int) $match['winner_id'] === (int) $_GET['user_id']) : ?>
+                                <span style="color: var(--green); font-weight: 600;">Win</span>
+                            <?php else : ?>
+                                <span style="color: var(--red); font-weight: 600;">Loss</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php $delta = (int) $match['delta']; ?>
+                            <span style="<?php echo $delta > 0 ? 'color: var(--green);' : ($delta < 0 ? 'color: var(--red);' : ''); ?> font-weight: 600;">
+                                <?php echo ($delta > 0 ? '+' : '') . $delta; ?>
+                            </span>
+                            (<?php echo (int) $match['elo_before']; ?> → <?php echo (int) $match['elo_after']; ?>)
+                        </td>
+                        <td><?php echo htmlspecialchars($match['played_at']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+</section>
+
+<section class="card">
     <h2>Elo Evolution</h2>
     <?php if (empty($history)) : ?>
         <p>No history yet.</p>
