@@ -19,6 +19,7 @@ $club = $data['club'];
 $user = $data['user'];
 $membership = $data['membership'];
 $history = $data['history'];
+$recent_matches = $data['recent_matches'];
 
 if (! $club || ! $user || ! $membership) {
     header('Location: index.php');
